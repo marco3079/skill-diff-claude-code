@@ -2,7 +2,8 @@
 
 Extensão do VS Code **Claude Review**: acumula as edições que o Claude Code (ou qualquer programa) faz nos seus arquivos, para você **revisar e aprovar depois**, no estilo do "working set" do Copilot Chat.
 
-- **Cartão de resumo** no painel lateral: "N arquivos alterados +A −D", com **Manter** / **Desfazer**.
+- **Janela de revisão** (`Claude Review: Abrir janela de revisão`, ou clique em "N edições" na barra de status): o cartão abre numa aba ao lado do editor/chat. Com `claudeReview.autoOpenWindow` ela abre sozinha na primeira edição e fecha quando tudo for resolvido.
+- **Cartão de resumo** (painel lateral e janela): "N arquivos alterados +A −D", com **Manter** / **Desfazer** e um botão `⧉` que abre **todos os diffs de uma vez**.
 - **Lista de arquivos** com `+N −M`; clique abre o **diff nativo** do VS Code. Passe o mouse para manter/desfazer só aquele arquivo.
 - **No editor**: linhas novas em verde, texto removido em vermelho ao lado da linha, e **Manter** / **Desfazer** acima de cada trecho (CodeLens).
 - **Manter tudo / Desfazer tudo**, navegação entre alterações (`Alt+F5`), atalhos `Ctrl+Alt+Enter` (manter) e `Ctrl+Alt+Backspace` (desfazer) no arquivo ativo.

@@ -2,7 +2,7 @@
   "name": "claude-review",
   "displayName": "Claude Review",
   "description": "Acumula as edições feitas em disco (ex.: Claude Code) e permite revisar, manter ou desfazer depois.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "publisher": "bottomup",
   "license": "MIT",
   "engines": {
@@ -93,6 +93,18 @@
         "title": "Reescanear workspace",
         "category": "Claude Review",
         "icon": "$(refresh)"
+      },
+      {
+        "command": "claudeReview.openWindow",
+        "title": "Abrir janela de revisão",
+        "category": "Claude Review",
+        "icon": "$(window)"
+      },
+      {
+        "command": "claudeReview.openAllDiffs",
+        "title": "Abrir todos os diffs",
+        "category": "Claude Review",
+        "icon": "$(diff-multiple)"
       }
     ],
     "menus": {
@@ -119,6 +131,11 @@
         }
       ],
       "view/title": [
+        {
+          "command": "claudeReview.openWindow",
+          "when": "view == claudeReview.files",
+          "group": "navigation@0"
+        },
         {
           "command": "claudeReview.keepAll",
           "when": "view == claudeReview.files",
@@ -214,6 +231,11 @@
           "type": "boolean",
           "default": false,
           "description": "Abre automaticamente o diff quando a primeira edição pendente aparecer."
+        },
+        "claudeReview.autoOpenWindow": {
+          "type": "boolean",
+          "default": false,
+          "description": "Abre a janela de revisão (ao lado do editor) quando a primeira edição pendente aparece e fecha quando tudo for resolvido."
         }
       }
     }

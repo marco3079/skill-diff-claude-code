@@ -82,7 +82,7 @@ function activateUI(context, store) {
 
   // ------------------------------------------------------------ status bar
   const statusItem = push(vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100));
-  statusItem.command = 'claudeReview.files.focus';
+  statusItem.command = 'claudeReview.openWindow';
   statusItem.tooltip = 'Claude Review: edições pendentes';
 
   // ------------------------------------------------- content providers
@@ -279,6 +279,7 @@ function activateUI(context, store) {
 
   // --------------------------------------------------------- refresh all
   let prevCount = 0;
+  let windowAutoOpened = false;
   try { prevCount = store.pendingEntries().length; } catch (e) { prevCount = 0; }
 
   function refreshSummary() {
@@ -312,6 +313,15 @@ function activateUI(context, store) {
         && vscode.workspace.getConfiguration('claudeReview').get('openDiffOnFirstChange', false)) {
         vscode.commands.executeCommand('claudeReview.openDiff', entries[0].uri);
       }
+      // Janela de revisão: abre sozinha na 1ª edição (opcional) e fecha quando tudo foi resolvido.
+      const autoWindow = vscode.workspace.getConfiguration('claudeReview').get('autoOpenWindow', false);
+      if (autoWindow && prevCount === 0 && n >= 1 && !panel.windowOpen) {
+        panel.openWindow();
+        windowAutoOpened = true;
+      } else if (n === 0 && windowAutoOpened && panel.windowOpen) {
+        panel.closeWindow();
+      }
+      if (!panel.windowOpen) windowAutoOpened = false;
       prevCount = n;
     } catch (e) {
       console.error('[claudeReview] onStoreChange', e);
@@ -378,6 +388,21 @@ function activateUI(context, store) {
     await store.undoAll();
   });
   register('claudeReview.rescan', async () => { await store.rescan(); });
+  register('claudeReview.openWindow', async () => { panel.openWindow(); });
+  register('claudeReview.openAllDiffs', async () => {
+    const entries = store.pendingEntries();
+    if (entries.length === 0) {
+      vscode.window.showInformationMessage('Claude Review: nenhuma edição pendente.');
+      return;
+    }
+    // Editor de múltiplos diffs do VS Code (o mesmo usado pelo Git para "Abrir alterações").
+    const resources = entries.map((e) => [
+      e.uri,
+      e.uri.with({ scheme: BASE_SCHEME }),
+      e.cur === null ? e.uri.with({ scheme: EMPTY_SCHEME }) : e.uri
+    ]);
+    await vscode.commands.executeCommand('vscode.changes', 'Edições do Claude', resources);
+  });
 
   register('claudeReview.keepHunk', async (uri, hunk) => {
     const u = resolveUri(uri);

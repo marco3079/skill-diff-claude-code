@@ -2,53 +2,81 @@
 
 const vscode = require('vscode');
 
-// Painel em webview no formato do cartão de edições do Copilot Chat:
-// "N arquivos alterados +A −D"  [Manter] [Desfazer]  + lista de arquivos com +N −M.
+// Cartão de edições no formato do Copilot Chat: "N arquivos alterados +A −D" [Manter] [Desfazer] + lista de arquivos.
+// O mesmo cartão pode aparecer no painel lateral (webview view) e/ou numa janela (aba do editor).
 class PanelProvider {
   constructor(getState) {
     this.getState = getState;
+    this.targets = new Set();
     this.view = undefined;
+    this.win = undefined;
+  }
+
+  _wire(webview) {
+    webview.options = { enableScripts: true };
+    const nonce = Math.random().toString(36).slice(2) + Date.now().toString(36);
+    webview.html = html(webview.cspSource, nonce);
+    this.targets.add(webview);
+    webview.onDidReceiveMessage((m) => this._onMessage(m));
+  }
+
+  _onMessage(m) {
+    try {
+      if (!m) return;
+      const uri = m.uri ? vscode.Uri.parse(m.uri) : undefined;
+      switch (m.cmd) {
+        case 'open': vscode.commands.executeCommand('claudeReview.openDiff', uri); break;
+        case 'keep': vscode.commands.executeCommand('claudeReview.keepFile', uri); break;
+        case 'undo': vscode.commands.executeCommand('claudeReview.undoFile', uri); break;
+        case 'keepAll': vscode.commands.executeCommand('claudeReview.keepAll'); break;
+        case 'undoAll': vscode.commands.executeCommand('claudeReview.undoAll'); break;
+        case 'diffAll': vscode.commands.executeCommand('claudeReview.openAllDiffs'); break;
+        case 'rescan': vscode.commands.executeCommand('claudeReview.rescan'); break;
+        case 'ready': this.refresh(); break;
+        default: break;
+      }
+    } catch (e) {
+      console.error('[claudeReview] panel message', e);
+    }
   }
 
   resolveWebviewView(view) {
     this.view = view;
-    view.webview.options = { enableScripts: true };
-    const nonce = Math.random().toString(36).slice(2) + Date.now().toString(36);
-    view.webview.html = html(view.webview.cspSource, nonce);
-    view.webview.onDidReceiveMessage((m) => {
-      try {
-        if (!m) return;
-        const uri = m.uri ? vscode.Uri.parse(m.uri) : undefined;
-        switch (m.cmd) {
-          case 'open': vscode.commands.executeCommand('claudeReview.openDiff', uri); break;
-          case 'keep': vscode.commands.executeCommand('claudeReview.keepFile', uri); break;
-          case 'undo': vscode.commands.executeCommand('claudeReview.undoFile', uri); break;
-          case 'keepAll': vscode.commands.executeCommand('claudeReview.keepAll'); break;
-          case 'undoAll': vscode.commands.executeCommand('claudeReview.undoAll'); break;
-          case 'rescan': vscode.commands.executeCommand('claudeReview.rescan'); break;
-          case 'ready': this.refresh(); break;
-          default: break;
-        }
-      } catch (e) {
-        console.error('[claudeReview] panel message', e);
-      }
-    });
+    this._wire(view.webview);
     view.onDidChangeVisibility(() => { if (view.visible) this.refresh(); });
-    view.onDidDispose(() => { if (this.view === view) this.view = undefined; });
+    view.onDidDispose(() => { this.targets.delete(view.webview); if (this.view === view) this.view = undefined; });
     this.refresh();
   }
 
+  openWindow() {
+    if (this.win) { this.win.reveal(undefined, true); return; }
+    const win = vscode.window.createWebviewPanel(
+      'claudeReview.window',
+      'Revisão de edições',
+      { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true },
+      { enableScripts: true, retainContextWhenHidden: true }
+    );
+    this.win = win;
+    this._wire(win.webview);
+    win.onDidChangeViewState(() => { if (win.visible) this.refresh(); });
+    win.onDidDispose(() => { this.targets.delete(win.webview); if (this.win === win) this.win = undefined; });
+    this.refresh();
+  }
+
+  closeWindow() { if (this.win) this.win.dispose(); }
+
+  get windowOpen() { return !!this.win; }
+
   refresh() {
-    try {
-      if (this.view) this.view.webview.postMessage({ type: 'state', ...this.getState() });
-    } catch (e) {
-      console.error('[claudeReview] panel refresh', e);
+    const state = this.getState();
+    for (const w of this.targets) {
+      try { w.postMessage({ type: 'state', ...state }); } catch (e) { console.error('[claudeReview] panel refresh', e); }
     }
   }
 
   setBadge(n) {
-    if (!this.view) return;
-    this.view.badge = n > 0 ? { value: n, tooltip: `${n} edições pendentes` } : undefined;
+    if (this.view) this.view.badge = n > 0 ? { value: n, tooltip: `${n} edições pendentes` } : undefined;
+    if (this.win) this.win.title = n > 0 ? `Revisão de edições (${n})` : 'Revisão de edições';
   }
 }
 
@@ -73,6 +101,7 @@ function html(csp, nonce) {
   button.primary { background: var(--vscode-button-background); color: var(--vscode-button-foreground); }
   button.primary:hover { background: var(--vscode-button-hoverBackground); }
   button.secondary { background: var(--vscode-button-secondaryBackground); color: var(--vscode-button-secondaryForeground); }
+  button.icon { padding: 2px 7px; }
   button.secondary:hover { background: var(--vscode-button-secondaryHoverBackground); }
   .files { border-top: 1px solid var(--vscode-widget-border, var(--vscode-panel-border)); padding: 2px 0; }
   .collapsed .files { display: none; }
@@ -122,7 +151,7 @@ function html(csp, nonce) {
     root.innerHTML = '<div class="card' + (collapsed ? ' collapsed' : '') + '">' +
       '<div class="head" id="head"><span class="chev">▾</span>' +
       '<span class="title">' + n + (n === 1 ? ' arquivo alterado' : ' arquivos alterados') + ' <span class="add">+' + state.add + '</span> <span class="del">−' + state.del + '</span></span>' +
-      '<span class="btns"><button class="primary" data-all="keepAll">Manter</button><button class="secondary" data-all="undoAll">Desfazer</button></span></div>' +
+      '<span class="btns"><button class="icon secondary" data-all="diffAll" title="Abrir todos os diffs">⧉</button><button class="primary" data-all="keepAll">Manter</button><button class="secondary" data-all="undoAll">Desfazer</button></span></div>' +
       '<div class="files">' + rows + '</div></div>';
   }
   root.addEventListener('click', (e) => {
