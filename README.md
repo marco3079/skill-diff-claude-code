@@ -36,7 +36,7 @@ Dica: coloque o Claude Code em modo de aceitar edições automaticamente; ele gr
 Abra o Claude Code e cole:
 
 ```
-Instale o projeto https://github.com/SEU_USUARIO/skill-diff-claude-code seguindo o INSTALL.md do repositório.
+Instale o projeto https://github.com/marco3079/skill-diff-claude-code seguindo o INSTALL.md do repositório.
 ```
 
 O Claude baixa o repositório, mostra o que vai fazer, pede sua confirmação e roda o instalador.
@@ -45,7 +45,7 @@ Depois: recarregue o VS Code (`Ctrl+Shift+P` → *Developer: Reload Window*).
 ### Instalar manualmente
 
 ```bash
-git clone https://github.com/SEU_USUARIO/skill-diff-claude-code.git
+git clone https://github.com/marco3079/skill-diff-claude-code.git
 cd skill-diff-claude-code
 node install.js --dry-run   # mostra o que será feito, sem alterar nada
 node install.js             # instala a extensão
@@ -60,7 +60,7 @@ Alternativa para quem usa apenas o Claude Code no terminal: o plugin **claude-di
 **(a) Como plugin** (dentro do Claude Code):
 
 ```
-/plugin marketplace add SEU_USUARIO/skill-diff-claude-code
+/plugin marketplace add marco3079/skill-diff-claude-code
 /plugin install claude-diff-review@skill-diff-claude-code
 ```
 
