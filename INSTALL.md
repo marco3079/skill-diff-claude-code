@@ -24,7 +24,7 @@ Este repositório contém a extensão de VS Code `claude-review` (revisão e apr
 
 Se o usuário usa apenas o Claude Code no terminal, há duas formas. A extensão do VS Code não é necessária.
 
-- **Plugin** (o usuário digita no Claude Code): `/plugin marketplace add SEU_USUARIO/skill-diff-claude-code` e `/plugin install claude-diff-review@skill-diff-claude-code`.
+- **Plugin** (o usuário digita no Claude Code): `/plugin marketplace add marco3079/skill-diff-claude-code` e `/plugin install claude-diff-review@skill-diff-claude-code`.
 - **Via install.js**:
   1. `node install.js --skill --dry-run`, resuma, peça confirmação e rode `node install.js --skill` (copia `skills/review-edits` para `~/.claude/skills`).
   2. O hook que captura as edições **é opcional e ALTERA o `~/.claude/settings.json`** (adiciona uma entrada `PreToolUse` para `review-edits/scripts/snapshot.js`; faz backup `settings.json.bak-<data>`; não mexe no resto). **Exige confirmação expressa do usuário**: explique isso, rode `node install.js --hooks --dry-run`, e só então `node install.js --hooks` após um "sim" claro. Nunca rode `--hooks` por padrão. Para remover: `node install.js --remove-hooks`. Se o JSON existente for inválido, o instalador aborta sem alterar nada.
