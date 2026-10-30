@@ -1,0 +1,11 @@
+{
+  "name": "skill-diff-claude-code",
+  "owner": { "name": "SEU_USUARIO" },
+  "plugins": [
+    {
+      "name": "claude-diff-review",
+      "source": "./",
+      "description": "Acumula as edições feitas pelo Claude Code para você revisar, manter ou desfazer depois, direto no terminal."
+    }
+  ]
+}
