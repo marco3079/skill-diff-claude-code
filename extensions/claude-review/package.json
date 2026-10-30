@@ -1,0 +1,221 @@
+{
+  "name": "claude-review",
+  "displayName": "Claude Review",
+  "description": "Acumula as edições feitas em disco (ex.: Claude Code) e permite revisar, manter ou desfazer depois.",
+  "version": "0.2.0",
+  "publisher": "bottomup",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "SCM Providers",
+    "Other"
+  ],
+  "main": "./extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "claudeReview",
+          "title": "Claude Review",
+          "icon": "$(diff)"
+        }
+      ]
+    },
+    "views": {
+      "claudeReview": [
+        {
+          "id": "claudeReview.files",
+          "name": "Edições pendentes",
+          "type": "webview"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "claudeReview.openDiff",
+        "title": "Abrir diff",
+        "category": "Claude Review",
+        "icon": "$(diff)"
+      },
+      {
+        "command": "claudeReview.keepFile",
+        "title": "Manter arquivo",
+        "category": "Claude Review",
+        "icon": "$(check)"
+      },
+      {
+        "command": "claudeReview.undoFile",
+        "title": "Desfazer arquivo",
+        "category": "Claude Review",
+        "icon": "$(discard)"
+      },
+      {
+        "command": "claudeReview.keepAll",
+        "title": "Manter tudo",
+        "category": "Claude Review",
+        "icon": "$(check-all)"
+      },
+      {
+        "command": "claudeReview.undoAll",
+        "title": "Desfazer tudo",
+        "category": "Claude Review",
+        "icon": "$(clear-all)"
+      },
+      {
+        "command": "claudeReview.keepHunk",
+        "title": "Manter",
+        "category": "Claude Review"
+      },
+      {
+        "command": "claudeReview.undoHunk",
+        "title": "Desfazer",
+        "category": "Claude Review"
+      },
+      {
+        "command": "claudeReview.nextChange",
+        "title": "Próxima alteração",
+        "category": "Claude Review",
+        "icon": "$(arrow-down)"
+      },
+      {
+        "command": "claudeReview.prevChange",
+        "title": "Alteração anterior",
+        "category": "Claude Review",
+        "icon": "$(arrow-up)"
+      },
+      {
+        "command": "claudeReview.rescan",
+        "title": "Reescanear workspace",
+        "category": "Claude Review",
+        "icon": "$(refresh)"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "claudeReview.keepHunk",
+          "when": "false"
+        },
+        {
+          "command": "claudeReview.undoHunk",
+          "when": "false"
+        },
+        {
+          "command": "claudeReview.openDiff",
+          "when": "claudeReview.activeFilePending"
+        },
+        {
+          "command": "claudeReview.keepFile",
+          "when": "claudeReview.activeFilePending"
+        },
+        {
+          "command": "claudeReview.undoFile",
+          "when": "claudeReview.activeFilePending"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "claudeReview.keepAll",
+          "when": "view == claudeReview.files",
+          "group": "navigation@1"
+        },
+        {
+          "command": "claudeReview.undoAll",
+          "when": "view == claudeReview.files",
+          "group": "navigation@2"
+        },
+        {
+          "command": "claudeReview.rescan",
+          "when": "view == claudeReview.files",
+          "group": "navigation@3"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "claudeReview.prevChange",
+          "when": "claudeReview.activeFilePending",
+          "group": "navigation@1"
+        },
+        {
+          "command": "claudeReview.nextChange",
+          "when": "claudeReview.activeFilePending",
+          "group": "navigation@2"
+        },
+        {
+          "command": "claudeReview.keepFile",
+          "when": "claudeReview.activeFilePending",
+          "group": "navigation@3"
+        },
+        {
+          "command": "claudeReview.undoFile",
+          "when": "claudeReview.activeFilePending",
+          "group": "navigation@4"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "claudeReview.keepFile",
+        "key": "ctrl+alt+enter",
+        "when": "claudeReview.activeFilePending"
+      },
+      {
+        "command": "claudeReview.undoFile",
+        "key": "ctrl+alt+backspace",
+        "when": "claudeReview.activeFilePending"
+      },
+      {
+        "command": "claudeReview.nextChange",
+        "key": "alt+f5",
+        "when": "claudeReview.hasPending"
+      }
+    ],
+    "configuration": {
+      "title": "Claude Review",
+      "properties": {
+        "claudeReview.excludeDirs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "node_modules",
+            ".git",
+            "out",
+            "dist",
+            "build",
+            ".venv",
+            "venv",
+            "__pycache__",
+            ".next",
+            ".vscode-test",
+            "target",
+            "bin",
+            "obj"
+          ],
+          "description": "Pastas ignoradas no snapshot e no monitoramento de arquivos."
+        },
+        "claudeReview.maxFileSizeKB": {
+          "type": "number",
+          "default": 512,
+          "description": "Tamanho máximo (KB) dos arquivos acompanhados."
+        },
+        "claudeReview.maxSnapshotFiles": {
+          "type": "number",
+          "default": 20000,
+          "description": "Número máximo de arquivos no snapshot inicial."
+        },
+        "claudeReview.openDiffOnFirstChange": {
+          "type": "boolean",
+          "default": false,
+          "description": "Abre automaticamente o diff quando a primeira edição pendente aparecer."
+        }
+      }
+    }
+  }
+}

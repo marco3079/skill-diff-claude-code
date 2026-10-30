@@ -1,0 +1,5 @@
+.vscode/**
+test/**
+PLAN.md
+**/*.vsix
+.gitignore
