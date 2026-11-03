@@ -120,6 +120,8 @@ export const register: Register = on => {
     cwd = e.cwd ?? (await $.session.cwd().catch(() => '')) ?? cwd
     void refresh($)
     $.clock.every(2000, () => { void refresh($) })
+    // Abre o painel sozinho ao iniciar a sessão (sem roubar o foco do chat).
+    void $.ui.open({ id: PANE, title: 'Revisão de edições', focus: false }).catch(() => undefined)
     return next(e)
   })
 
