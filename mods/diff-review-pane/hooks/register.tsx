@@ -146,6 +146,16 @@ export const register: Register = on => {
     }
   })
 
+  // Um painel aberto sem pedido da pessoa só é desenhado em janela larga; aberto "atrás" de um prompt,
+  // vale como pedido e é desenhado em qualquer largura. Então abre também no primeiro prompt da sessão.
+  on('prompt.submit', async ($, e, next) => {
+    if (!opened) {
+      const r = await $.ui.open({ id: PANE, title: 'Revisão de edições' }).catch(() => undefined)
+      if (r && r.isPlaced) opened = true
+    }
+    return next(e)
+  })
+
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
     const { Box, Text, Button, Svg } = $.ui.resolve(e) as any
     const v = await read($, view)
