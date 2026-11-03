@@ -44,6 +44,7 @@ const view = atom(
   { shape: 'view-1' },
 )
 
+let opened = false
 let cwd = ''
 let lastSig = ''
 
@@ -121,7 +122,15 @@ export const register: Register = on => {
     void refresh($)
     $.clock.every(2000, () => { void refresh($) })
     // Abre o painel sozinho ao iniciar a sessão (sem roubar o foco do chat).
-    void $.ui.open({ id: PANE, title: 'Revisão de edições', focus: false }).catch(() => undefined)
+    // O app pode ainda não ter a superfície pronta ao iniciar: tenta de novo algumas vezes até desenhar.
+    for (const ms of [0, 2000, 5000, 10000]) {
+      $.clock.after(ms, async () => {
+        if (opened) return
+        const r = await $.ui.open({ id: PANE, title: 'Revisão de edições', focus: false }).catch(() => undefined)
+        if (r && r.isPlaced) opened = true
+        else if (r) $.ui.log('Revisão de edições: não abriu (' + r.reason + ')')
+      })
+    }
     return next(e)
   })
 
