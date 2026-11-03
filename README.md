@@ -33,13 +33,13 @@ Dica: coloque o Claude Code em modo de aceitar edições automaticamente; ele gr
 
 ## Instalar com um prompt
 
-Abra o Claude Code e cole:
+Abra o Claude Code (desktop, VS Code ou terminal), cole o link do repositório com o pedido abaixo e envie:
 
 ```
 Instale o projeto https://github.com/marco3079/skill-diff-claude-code seguindo o INSTALL.md do repositório.
 ```
 
-O Claude baixa o repositório, mostra o que vai fazer, pede sua confirmação e roda o instalador.
+O Claude baixa o repositório, mostra o que vai fazer, pede sua confirmação e instala tudo de uma vez: a skill, o painel `/revisao` do Claude Code desktop e a extensão do VS Code. Funciona no Claude Code desktop e no VS Code.
 Depois: recarregue o VS Code (`Ctrl+Shift+P` → *Developer: Reload Window*).
 
 ### Instalar manualmente

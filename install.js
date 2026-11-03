@@ -8,6 +8,7 @@
 //   node install.js --extensions  só as extensões do VS Code (arquivos de dist/)
 //   node install.js --hooks      ADICIONA o hook de snapshot em ~/.claude/settings.json (só com esta flag; faz backup)
 //   node install.js --remove-hooks  remove esse hook do settings.json (faz backup)
+//   node install.js --plugins    só o painel do Claude Code desktop (/plugin); --no-plugins pula esse passo
 //   node install.js --build       reempacota os .vsix a partir de extensions/ antes de instalar (precisa de npm/npx)
 //   node install.js --editor cursor   usa outro editor compatível com VS Code (padrão: code)
 //
@@ -36,6 +37,7 @@ const rmHooks = has('--remove-hooks');
 const hooksOnly = (addHooks || rmHooks) && !onlySkill && !onlyExt;
 const doSkill = !hooksOnly && (onlySkill || !onlyExt) && fs.existsSync(skillsDir);
 const doExt = !hooksOnly && (onlyExt || !onlySkill) && fs.existsSync(extDir);
+const doPlugins = has('--plugins') || (!onlySkill && !onlyExt && !has('--hooks') && !has('--remove-hooks') && !has('--no-plugins'));
 const editor = opt('--editor', 'code');
 const log = (m) => console.log(m);
 const step = (m) => log(`${dry ? '[simulação] ' : ''}${m}`);
@@ -71,6 +73,22 @@ function installSkills() {
     }
   }
   return ok;
+}
+
+// Painel visual do Claude Code desktop (pasta mods/): registra este repositório como marketplace e instala o plugin.
+function installPlugins() {
+  const MARKET = 'skill-diff-claude-code';
+  const PLUGIN = 'diff-review-pane';
+  const probe = run('claude', ['--version']);
+  if (!probe.ok) { log('Aviso: comando "claude" não encontrado; pulei o painel do Claude Code desktop. Instale depois com: /plugin install ' + PLUGIN + ' --marketplace marco3079/' + MARKET); return true; }
+  step('Registrando marketplace marco3079/' + MARKET + ' e instalando o plugin ' + PLUGIN);
+  if (dry) return true;
+  const add = run('claude', ['plugin', 'marketplace', 'add', 'marco3079/' + MARKET]);
+  if (!add.ok) { log('ERRO ao registrar o marketplace:' + String.fromCharCode(10) + add.out); return false; }
+  const inst = run('claude', ['plugin', 'install', PLUGIN + '@' + MARKET]);
+  if (!inst.ok) { log('ERRO ao instalar o plugin:' + String.fromCharCode(10) + inst.out); return false; }
+  log('Plugin ' + PLUGIN + ' instalado.');
+  return true;
 }
 
 function buildVsix() {
@@ -176,6 +194,7 @@ log(`${path.basename(here)} — instalador`);
 let ok = true;
 if (doSkill) ok = installSkills() && ok;
 if (doExt) ok = installExtensions() && ok;
+if (doPlugins) ok = installPlugins() && ok;
 if (addHooks && rmHooks) { log('ERRO: use --hooks ou --remove-hooks, não os dois.'); process.exit(1); }
 if (addHooks || rmHooks) ok = editHooks(rmHooks) && ok;
 if (!doSkill && !doExt && !addHooks && !rmHooks) { log('Nada para instalar neste repositório com essas opções.'); process.exit(1); }
@@ -185,6 +204,7 @@ else if (ok) {
   log('\nConcluído.');
   if (doExt) log('→ Recarregue o VS Code: Ctrl+Shift+P → "Developer: Reload Window".');
   if (doSkill) log('→ Abra uma NOVA sessão do Claude Code para a skill aparecer.');
+  if (doPlugins) log('→ No Claude Code desktop: /reload-plugins e depois /revisao.');
   if (addHooks || rmHooks) log('→ Abra uma NOVA sessão do Claude Code para o hook valer.');
 } else {
   log('\nTerminou com erros (veja acima).');
