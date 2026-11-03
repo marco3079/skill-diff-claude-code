@@ -1,0 +1,8 @@
+{
+  "name": "diff-review-pane",
+  "version": "0.1.0",
+  "description": "Painel \"Revisão de edições\": veja os arquivos que o Claude alterou, o diff verde/vermelho e aprove (Manter) ou reprove (Desfazer) por arquivo, por trecho ou tudo. Abre com /revisao.",
+  "author": { "name": "marco3079" },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

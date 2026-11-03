@@ -55,13 +55,13 @@ Opções: `--build` (recompila o `.vsix`), `--editor cursor` (outro editor compa
 
 ## Só Claude Code (sem VS Code)
 
-Alternativa para quem usa apenas o Claude Code no terminal: o plugin **claude-diff-review** guarda a versão de cada arquivo antes da primeira edição do Claude (hook `PreToolUse`) e deixa você revisar depois, com "N arquivos alterados +A −D", diff verde/vermelho e Manter/Desfazer por arquivo, trecho ou tudo.
+Alternativa para quem usa apenas o Claude Code no terminal: o plugin **diff-review** guarda a versão de cada arquivo antes da primeira edição do Claude (hook `PreToolUse`) e deixa você revisar depois, com "N arquivos alterados +A −D", diff verde/vermelho e Manter/Desfazer por arquivo, trecho ou tudo.
 
 **(a) Como plugin** (dentro do Claude Code):
 
 ```
 /plugin marketplace add marco3079/skill-diff-claude-code
-/plugin install claude-diff-review@skill-diff-claude-code
+/plugin install diff-review@skill-diff-claude-code
 ```
 
 **(b) Via prompt**: peça ao Claude para instalar seguindo o `INSTALL.md`. Ele roda `node install.js --skill` e, **somente com o seu pedido ou confirmação expressa**, `node install.js --hooks` (que edita o `~/.claude/settings.json`, com backup). `node install.js --remove-hooks` desfaz.
@@ -80,6 +80,14 @@ Na interface interativa: `↑/↓` navega, `Enter`/`d` abre o diff, `n`/`p` trec
 
 Limitações: só captura `Edit`, `Write`, `MultiEdit` e `NotebookEdit` (mudanças por Bash como `sed` ou `git checkout` não entram); a linha de base começa na primeira edição vista pelo hook; binários e arquivos acima de 1 MB são ignorados. Testes: `node test/review.test.js`.
 
+## Painel visual no Claude Code desktop
+
+Plugin `diff-review-pane` (pasta `mods/`): digite **`/revisao`** e abre um painel ao lado do chat com "N arquivos alterados +A −D", diff verde/vermelho e botões **Manter / Desfazer** por arquivo, por trecho ou tudo. Usa a skill `review-edits` (instale junto: `node install.js --skill --hooks`).
+
+```
+/plugin install diff-review-pane --marketplace marco3079/skill-diff-claude-code
+```
+
 ## Limitações
 
 - Não é pixel-idêntico ao Copilot: a interface dele usa APIs internas do VS Code. Aqui usamos o editor de diff nativo, decorações e CodeLens.
@@ -93,6 +101,7 @@ Limitações: só captura `Edit`, `Write`, `MultiEdit` e `NotebookEdit` (mudanç
 extensions/claude-review/   código-fonte da extensão
 dist/                       .vsix pronto para instalar
 .claude-plugin/ hooks/      plugin e marketplace do Claude Code (hook de snapshot)
+mods/diff-review-pane/      painel visual do Claude Code desktop (/revisao)
 skills/review-edits/        skill + scripts (review.js, tui.js, snapshot.js)
 test/                       testes (node test/review.test.js)
 install.js                  instalador (Windows, macOS, Linux)

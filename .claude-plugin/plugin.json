@@ -1,5 +1,5 @@
 {
-  "name": "claude-diff-review",
+  "name": "diff-review",
   "version": "0.1.0",
   "description": "Acumula as edições feitas pelo Claude Code para você revisar, manter ou desfazer depois (arquivo, trecho ou tudo), direto no terminal.",
   "license": "MIT"

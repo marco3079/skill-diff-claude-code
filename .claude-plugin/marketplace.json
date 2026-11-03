@@ -1,11 +1,18 @@
 {
   "name": "skill-diff-claude-code",
-  "owner": { "name": "SEU_USUARIO" },
+  "owner": {
+    "name": "marco3079"
+  },
   "plugins": [
     {
-      "name": "claude-diff-review",
+      "name": "diff-review",
       "source": "./",
       "description": "Acumula as edições feitas pelo Claude Code para você revisar, manter ou desfazer depois, direto no terminal."
+    },
+    {
+      "name": "diff-review-pane",
+      "source": "./mods/diff-review-pane",
+      "description": "Painel visual no Claude Code desktop: /revisao abre os arquivos alterados com diff verde/vermelho e Manter/Desfazer."
     }
   ]
 }
