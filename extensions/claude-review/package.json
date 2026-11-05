@@ -2,8 +2,8 @@
   "name": "claude-review",
   "displayName": "Claude Review",
   "description": "Acumula as edições feitas em disco (ex.: Claude Code) e permite revisar, manter ou desfazer depois.",
-  "version": "0.3.0",
-  "publisher": "bottomup",
+  "version": "0.3.1",
+  "publisher": "marco3079",
   "license": "MIT",
   "engines": {
     "vscode": "^1.85.0"

@@ -114,6 +114,8 @@ function installExtensions() {
   const vsix = fs.existsSync(dist) ? fs.readdirSync(dist).filter((f) => f.endsWith('.vsix')).sort() : [];
   if (!vsix.length) { log('ERRO: nenhum .vsix em dist/. Rode: node install.js --build'); return false; }
   const probe = run(editor, ['--version']);
+  // Versões antigas publicadas com outro nome de publicador: remove para não duplicar.
+  if (probe.ok && !dry) run(editor, ['--uninstall-extension', 'bottomup.claude-review']);
   if (!probe.ok) {
     log(`ERRO: o comando "${editor}" não foi encontrado no PATH.`);
     log('Windows: reinstale o VS Code marcando "Adicionar ao PATH". macOS: Ctrl+Shift+P → "Shell Command: Install \'code\' command in PATH".');
